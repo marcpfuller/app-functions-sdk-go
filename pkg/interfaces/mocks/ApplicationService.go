@@ -270,36 +270,6 @@ func (_m *ApplicationService) GetAppSettingStrings(setting string) ([]string, er
 	return r0, r1
 }
 
-// GetSecret provides a mock function with given fields: path, keys
-func (_m *ApplicationService) GetSecret(path string, keys ...string) (map[string]string, error) {
-	_va := make([]interface{}, len(keys))
-	for _i := range keys {
-		_va[_i] = keys[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, path)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
-
-	var r0 map[string]string
-	if rf, ok := ret.Get(0).(func(string, ...string) map[string]string); ok {
-		r0 = rf(path, keys...)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(map[string]string)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(string, ...string) error); ok {
-		r1 = rf(path, keys...)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // ListenForCustomConfigChanges provides a mock function with given fields: configToWatch, sectionName, changedCallback
 func (_m *ApplicationService) ListenForCustomConfigChanges(configToWatch interface{}, sectionName string, changedCallback func(interface{})) error {
 	ret := _m.Called(configToWatch, sectionName, changedCallback)

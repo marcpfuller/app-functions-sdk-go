@@ -298,7 +298,7 @@ func TestContext_GetSecret(t *testing.T) {
 		},
 	})
 
-	actual, err := target.GetSecret("mqtt")
+	actual, err := target.SecretProvider().GetSecret("mqtt")
 	require.NoError(t, err)
 	assert.Equal(t, expected, actual)
 }

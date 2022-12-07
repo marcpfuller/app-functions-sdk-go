@@ -20,15 +20,17 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"testing"
+
 	"github.com/edgexfoundry/app-functions-sdk-go/v2/internal/etm"
 	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/interfaces/mocks"
 	"github.com/edgexfoundry/app-functions-sdk-go/v2/pkg/util"
+	bootstrapMocks "github.com/edgexfoundry/go-mod-bootstrap/v2/bootstrap/interfaces/mocks"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/clients/logger"
 	"github.com/edgexfoundry/go-mod-core-contracts/v2/common"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestNewAESProtection(t *testing.T) {
@@ -73,7 +75,9 @@ func TestAESProtection_getKey(t *testing.T) {
 			name:   "secret error",
 			fields: fields{SecretPath: secretPath, SecretName: secretName},
 			ctxSetup: func(ctx *mocks.AppFunctionContext) {
-				ctx.On("GetSecret", secretPath, secretName).Return(nil, fmt.Errorf("secret error"))
+				mockSecretProvider := &bootstrapMocks.SecretProvider{}
+				mockSecretProvider.On("GetSecret", secretPath, secretName).Return(nil, fmt.Errorf("secret error"))
+				ctx.On("SecretProvider").Return(mockSecretProvider)
 			},
 			wantErr: true,
 		},
@@ -81,7 +85,9 @@ func TestAESProtection_getKey(t *testing.T) {
 			name:   "secret not in map",
 			fields: fields{SecretPath: secretPath, SecretName: secretName},
 			ctxSetup: func(ctx *mocks.AppFunctionContext) {
-				ctx.On("GetSecret", secretPath, secretName).Return(map[string]string{}, nil)
+				mockSecretProvider := &bootstrapMocks.SecretProvider{}
+				mockSecretProvider.On("GetSecret", secretPath, secretName).Return(map[string]string{}, nil)
+				ctx.On("SecretProvider").Return(mockSecretProvider)
 			},
 			wantErr: true,
 		},
@@ -90,7 +96,9 @@ func TestAESProtection_getKey(t *testing.T) {
 			fields: fields{SecretPath: secretPath, SecretName: secretName},
 			ctxSetup: func(ctx *mocks.AppFunctionContext) {
 				ctx.On("SetResponsesContentType", common.ContentTypeText).Return()
-				ctx.On("GetSecret", secretPath, secretName).Return(map[string]string{secretName: key}, nil)
+				mockSecretProvider := &bootstrapMocks.SecretProvider{}
+				mockSecretProvider.On("GetSecret", secretPath, secretName).Return(map[string]string{secretName: key}, nil)
+				ctx.On("SecretProvider").Return(mockSecretProvider)
 			},
 			wantErr: false,
 		},
@@ -131,7 +139,9 @@ func TestAESProtection_Encrypt(t *testing.T) {
 	ctx.On("SetResponseContentType", common.ContentTypeText).Return()
 	ctx.On("PipelineId").Return("pipeline-id")
 	ctx.On("LoggingClient").Return(logger.NewMockClient())
-	ctx.On("GetSecret", secretPath, secretName).Return(map[string]string{secretName: key}, nil)
+	mockSecretProvider := &bootstrapMocks.SecretProvider{}
+	mockSecretProvider.On("GetSecret", secretPath, secretName).Return(map[string]string{secretName: key}, nil)
+	ctx.On("SecretProvider").Return(mockSecretProvider)
 
 	enc := NewAESProtection(secretPath, secretName)
 
