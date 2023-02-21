@@ -223,7 +223,7 @@ func (sender *MQTTSecretSender) MQTTSend(ctx interfaces.AppFunctionContext, data
 		ctx.LoggingClient().Debugf("Initializing metric %s.", metricName)
 		sender.mqttSizeMetrics = gometrics.NewHistogram(gometrics.NewUniformSample(internal.MetricsReservoirSize))
 		metricsManger := ctx.MetricsManager()
-		if metricsManger != nil {
+		if metricsManger != nil && metricsManger.IsRegistered(metricName){
 			err = metricsManger.Register(metricName, sender.mqttSizeMetrics, map[string]string{"address/topic": tag})
 		} else {
 			err = errors.New("metrics manager not available")
